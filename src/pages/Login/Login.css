@@ -1,0 +1,18 @@
+.login-page {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-panel {
+    padding: 2rem;
+    box-shadow: var(--box-shadow);
+    background: var(--color-light);
+    border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
