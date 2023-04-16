@@ -1,14 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap');
 
 :root {
-  --color-primary: #3F51B5;
+  --color-primary: #5C6BC0;
+  --color-primary-variant: #42A5F5;
   --color-bg: #E8EAF6;
-  --color-light: #fff;
-  --color-dark: #000;
-  --color-success: #0f0;
+  --color-light: #f4f5ff;
+  --color-dark: #263238;
+  --color-success: #00E676;
   --color-error: #e31616;
-  --color-warning: #f97427;
-  --box-shadow: box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  --color-warning: #FFA000;
+  --color-white: #fff;
+  --box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   --border-radius: 1rem;
 }
 
@@ -21,6 +23,10 @@
 }
 
 body {
-  font-family: 'Quicksand' sans-serif;
+  font-family: Poppins;
   background: var(--color-bg);
+}
+
+.error {
+  border: 2px solid var(--color-error) !important;
 }
