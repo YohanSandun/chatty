@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import './Login.css';
-// import app from '../../lib/firebase';
+import app from '../../lib/firebase';
+import { signInWithEmailAndPassword, getAuth } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom'
 
 function Login() {
+    const navigate = useNavigate();
+    const auth = getAuth(app);
 
     const [email, setEmail] = useState('');
     const [pass, setPass] = useState('');
@@ -19,17 +23,33 @@ function Login() {
 
         setErrors(errs);
 
-        return errs.email || errs.pass;
+        return !(errs.email || errs.pass);
         // setErrors(prevErrors => ({
         //     ...prevErrors,
         //     email: true
         // }));
     }
 
+    const handleLogin = () => {
+        console.log("Goin to login");
+        signInWithEmailAndPassword(auth, email, pass)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            navigate("/home")
+            console.log(user);
+        })
+        .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log(errorCode, errorMessage)
+        });
+    }
+
     const handleSubmit = (e) => {
         e.preventDefault();
 
         if (validateFields()) {
+            handleLogin();
             return true;
         }
 
