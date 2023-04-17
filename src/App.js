@@ -1,9 +1,21 @@
 import './App.css';
 import Login from './pages/Login';
+import { BrowserRouter as Router} from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 function App() {
   return (
-    <Login />
+    <Router>
+      <div>
+        <section>
+          <Routes>                                                                        
+            <Route path="/" element={<div>Home</div>} />
+            <Route path="/signup" element={<div>Signup</div>} />
+            <Route path="/login" element={<Login />} />
+          </Routes>
+        </section>
+      </div>
+    </Router>
   );
 }
 
