@@ -30,3 +30,7 @@ body {
 .error {
   border: 2px solid var(--color-error) !important;
 }
+
+html {
+  scroll-behavior: smooth;
+}
