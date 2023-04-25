@@ -4,6 +4,11 @@ import Chat from "../../components/Chat";
 import app from '../../lib/firebase';
 import { orderBy, onSnapshot, getFirestore, query, collection, where, getDocs, doc, addDoc, serverTimestamp } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import NewChat from "../../dialogs/NewChat";
+import AddCommentIcon from '@mui/icons-material/AddComment';
+import SendIcon from '@mui/icons-material/Send';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function Home() {
     const db = getFirestore(app);
@@ -14,6 +19,9 @@ function Home() {
     const [chat, setChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState('');
+    const [showNewChat, setShowNewChat] = useState(false);
+    const [email, setEmail] = useState('');
+    const [open, setOpen] = useState(false);
 
     const scrollElement = useRef(null);
 
@@ -31,7 +39,7 @@ function Home() {
     useEffect(() => {
         loadChats();
         // eslint-disable-next-line
-    }, mydoc);
+    }, [mydoc]);
 
     useEffect(() => {
         loadMessages();
@@ -46,7 +54,7 @@ function Home() {
         if (chat === null) {
             return;
         }
-        
+
         onSnapshot(query(collection(db, "chats/" + chat.id + '/messages'), orderBy("time", "asc")), querySnapshot => {
             let _messages = [];
             querySnapshot.forEach((doc) => {
@@ -57,7 +65,7 @@ function Home() {
                     time: data.time
                 });
             });
-            setMessages(_messages); 
+            setMessages(_messages);
         });
     }
 
@@ -100,6 +108,26 @@ function Home() {
         }).then(() => setMessage(''));
     }
 
+    const addNewChat = () => {
+        setOpen(true);
+        const q = query(collection(db, "users"), where("email", "==", email));
+        getDocs(q).then(querySnapshot => {
+            if (querySnapshot.docs.length > 0) {
+                addDoc(collection(db, "chats"), {
+                    participants: [mydoc, doc(db, "users/" + querySnapshot.docs[0].id)],
+                    participant_names: ['TODO', querySnapshot.docs[0].data().name]
+                }).then(() => {
+                    setShowNewChat(false);
+                    setOpen(false);
+                    loadChats();
+                })
+            } else {
+                setOpen(false);
+                alert("User not found!");
+            }
+        });
+    }
+
     return (
         <div className="chats-home">
             <div className="chats">
@@ -108,6 +136,9 @@ function Home() {
                         <Chat key={index} chat={item} setChat={setChat} />
                     ))
                 }
+                <div className="new-chat" onClick={() => setShowNewChat(true)}>
+                    <AddCommentIcon />
+                </div>
             </div>
             <div className="messages">
 
@@ -120,12 +151,6 @@ function Home() {
                     </div>
                 </div>
                 <div className="messages-list" ref={scrollElement}>
-                    {/* <div className="message">
-                        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Sapiente animi, minus aspernatur iusto sequi, porro eius quam eaque corporis reprehenderit doloribus excepturi! Eos error dignissimos magni id, consequuntur reprehenderit adipisci.
-                    </div>
-                    <div className="message my-message">
-                        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Sapiente animi, minus aspernatur iusto sequi, porro eius quam eaque corporis reprehenderit doloribus excepturi! Eos error dignissimos magni id, consequuntur reprehenderit adipisci.
-                    </div> */}
                     {
                         chat &&
                         messages.map((item, index) => (
@@ -139,11 +164,20 @@ function Home() {
                     <div className="message-input">
                         <textarea value={message} onChange={e => setMessage(e.target.value)} name="text" id="text" rows="1" placeholder="Your Message"></textarea>
                         <div className="send-button" onClick={() => sendMessage()}>
-                            SEND
+                            <SendIcon />
                         </div>
                     </div>
                 </div>
             </div>
+
+            {showNewChat && <NewChat setShowNewChat={setShowNewChat} email={email} setEmail={setEmail} addNewChat={addNewChat} />}
+
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={open}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
         </div>
     )
 }

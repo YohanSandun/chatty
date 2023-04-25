@@ -12,6 +12,35 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    position: relative;
+}
+
+.chats .new-chat {
+    box-shadow: var(--box-shadow);
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    background: var(--color-primary);
+    border-radius: 50%;
+    padding: 0.5rem;
+    width: 50px;
+    height: 50px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    color: var(--color-light);
+    cursor: pointer;
+    user-select: none;
+    transition: all 300ms ease;
+}
+
+.chats .new-chat:hover {
+    opacity: 0.7;
+    box-shadow: none;
+}
+
+.chats .new-chat svg {
+    fill: var(--color-light);
 }
 
 .chat {
@@ -113,4 +142,7 @@
 
 .message-input .send-button {
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
