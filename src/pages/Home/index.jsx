@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import './Home.css';
 import Chat from "../../components/Chat";
 import app from '../../lib/firebase';
-import { orderBy, onSnapshot, getFirestore, query, collection, where, getDocs, doc, addDoc, serverTimestamp } from "firebase/firestore";
+import { orderBy, getDoc, onSnapshot, getFirestore, query, collection, where, getDocs, doc, addDoc, serverTimestamp } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import NewChat from "../../dialogs/NewChat";
 import AddCommentIcon from '@mui/icons-material/AddComment';
@@ -11,6 +11,9 @@ import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 
 function Home() {
+
+    var userName = useRef('');
+
     const db = getFirestore(app);
     const auth = getAuth(app);
 
@@ -28,7 +31,11 @@ function Home() {
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                setMydoc(doc(db, '/users/' + user.uid));
+                let d = doc(db, '/users/' + user.uid);
+                getDoc(d).then((docSnap) => {
+                    userName.current = docSnap.data().name;
+                    setMydoc(d);
+                });
             } else {
                 console.log("user is logged out")
             }
@@ -115,7 +122,7 @@ function Home() {
             if (querySnapshot.docs.length > 0) {
                 addDoc(collection(db, "chats"), {
                     participants: [mydoc, doc(db, "users/" + querySnapshot.docs[0].id)],
-                    participant_names: ['TODO', querySnapshot.docs[0].data().name]
+                    participant_names: [userName.current, querySnapshot.docs[0].data().name]
                 }).then(() => {
                     setShowNewChat(false);
                     setOpen(false);
