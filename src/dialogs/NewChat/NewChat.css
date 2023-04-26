@@ -54,3 +54,13 @@
     opacity: 0.8;
     box-shadow: none;
 }
+
+@media screen and (max-width: 600px) {
+    .new-chat-dialog {
+        width: 96%;
+    }
+
+    .new-chat-dialog input {
+        width: 100%;
+    }
+}

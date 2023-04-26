@@ -8,6 +8,8 @@ import NewChat from "../../dialogs/NewChat";
 import AddCommentIcon from '@mui/icons-material/AddComment';
 import SendIcon from '@mui/icons-material/Send';
 import BackdropOverlay from "../../components/BackdropOverlay";
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function Home() {
 
@@ -27,6 +29,7 @@ function Home() {
 
     const scrollElementRef = useRef(null);
     const mydocRef = useRef(null);
+    const chatsRef = useRef(null);
 
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
@@ -53,10 +56,20 @@ function Home() {
         scrollElementRef.current.scrollTop = scrollElementRef.current.scrollHeight;
     }, [messages])
 
+    const showChats = () => {
+        chatsRef.current.classList.add("show-chats");
+    }
+
+    const hideChats = () => {
+        chatsRef.current.classList.remove("show-chats");
+    }
+
     const loadMessages = () => {
         if (chat === null) {
             return;
         }
+        
+        hideChats();
 
         onSnapshot(query(collection(db, "chats/" + chat.id + '/messages'), orderBy("time", "asc")), querySnapshot => {
             let _messages = [];
@@ -139,7 +152,8 @@ function Home() {
 
     return (
         <div className="chats-home">
-            <div className="chats">
+            <div className="chats" ref={chatsRef}>
+                <ArrowBackIcon onClick={hideChats} />
                 {
                     chats.map((item, index) => (
                         <Chat key={index} chat={item} setChat={setChat} />
@@ -150,8 +164,8 @@ function Home() {
                 </div>
             </div>
             <div className="messages">
-
                 <div className="message-header">
+                    <FormatListBulletedIcon onClick={showChats}/>
                     <div className="profile-pic">
                         <img src="https://st3.depositphotos.com/4111759/13425/v/600/depositphotos_134255710-stock-illustration-avatar-vector-male-profile-gray.jpg" alt="Profile" />
                     </div>
