@@ -1,19 +1,30 @@
 import React, { useState } from "react";
-import ''
+import './Signup.css';
+import app from '../../lib/firebase';
+import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom'
+import BackdropOverlay from "../../components/BackdropOverlay";
+import Alert from '@mui/material/Alert';
+import { addDoc, collection, getFirestore } from "firebase/firestore";
+
 function Signup() {
 
     const navigate = useNavigate();
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
     const [open, setOpen] = useState(false);
     const [email, setEmail] = useState('');
     const [pass, setPass] = useState('');
+    const [passConfirm, setPassConfirm] = useState('');
     const [username, setUsername] = useState('');
     const [errors, setErrors] = useState({
         email: false,
         pass: false,
+        passConfirm: false,
         username: false,
     });
+    const [signupError, setSignupError] = useState(null);
 
     const validateFields = () => {
         let errs = { ...errors }
@@ -21,10 +32,45 @@ function Signup() {
         errs.email = email.trim().length === 0;
         errs.username = username.trim().length === 0;
         errs.pass = pass.length < 6;
+        errs.passConfirm = passConfirm !== pass;
 
         setErrors(errs);
 
-        return !(errs.email || errs.pass || errs.username);
+        return !(errs.email || errs.pass || errs.username || errs.passConfirm);
+    }
+
+    const handleSignup = () => {
+        createUserWithEmailAndPassword(auth, email, pass)
+            .then(() => {
+                addDoc(collection(db, "users"), {
+                    name: username,
+                    email: email
+                }).then(() => {
+                    setOpen(false);
+                    navigate("/home")
+                })
+                .catch(() => {
+                    setOpen(false);
+                    setSignupError("Signup failed!");
+                });
+            })
+            .catch((error) => {
+                setOpen(false);
+                setSignupError(error.code);
+            });
+    }
+
+    const handleSubmit = (e) => {
+        setOpen(true);
+        e.preventDefault();
+
+        if (validateFields()) {
+            handleSignup();
+            return true;
+        }
+
+        setOpen(false);
+        return false;
     }
 
     return (
@@ -32,8 +78,8 @@ function Signup() {
             <form className="signup-panel" onSubmit={handleSubmit}>
                 <h2>SIGNUP</h2>
                 {
-                    loginError && <Alert variant="filled" severity="error">
-                        {loginError}
+                    signupError && <Alert variant="filled" severity="error">
+                        {signupError}
                     </Alert>
                 }
                 <div className="email-pass-signup">
@@ -48,6 +94,10 @@ function Signup() {
                     <div className="email-pass-row">
                         <input type="password" required className={errors.pass ? 'error' : ''} value={pass} onChange={(e) => setPass(e.target.value)} name="password" id="password" />
                         <label htmlFor="password">Password</label>
+                    </div>
+                    <div className="email-pass-row">
+                        <input type="password" required className={errors.passConfirm ? 'error' : ''} value={passConfirm} onChange={(e) => setPassConfirm(e.target.value)} name="password_confirm" id="password_confirm" />
+                        <label htmlFor="password_confirm">Confirm Password</label>
                     </div>
                     <button type="submit">SIGNUP</button>
                 </div>

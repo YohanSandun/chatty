@@ -35,7 +35,6 @@ function Login() {
     }
 
     const handleLogin = () => {
-        console.log("Goin to login");
         signInWithEmailAndPassword(auth, email, pass)
             .then(() => {
                 setOpen(false);
