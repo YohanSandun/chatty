@@ -13,9 +13,33 @@
     border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
     align-items: center;
-    width: 300px;
+    width: 350px;
+}
+
+.signup-msg {
+    font-size: 10pt;
+    margin-top: 1rem;
+}
+
+.signup-msg a {
+    color: var(--color-primary);
+    font-weight: 500;
+    transition: color 300ms ease;
+}
+
+.signup-msg a:hover {
+    color: var(--color-primary-variant);
+}
+
+.login-panel div[role="alert"] {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.login-panel div[role="alert"] * {
+    color: white;
 }
 
 .email-pass-login {
@@ -36,7 +60,7 @@
 .email-pass-row input {
     padding: 0.5rem;
     border: none;
-    border-radius: 0.5rem;
+    border-radius: 5px;
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
     background: var(--color-white);
     margin-top: 0.2rem;
@@ -65,7 +89,7 @@
     border: none;
     background: var(--color-primary);
     color: var(--color-light);
-    border-radius: 0.5rem;
+    border-radius: 5px;
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
     transition: background 300ms ease;
     cursor: pointer;

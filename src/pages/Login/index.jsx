@@ -3,17 +3,21 @@ import './Login.css';
 import app from '../../lib/firebase';
 import { signInWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom'
+import BackdropOverlay from "../../components/BackdropOverlay";
+import Alert from '@mui/material/Alert';
 
 function Login() {
     const navigate = useNavigate();
     const auth = getAuth(app);
 
+    const [open, setOpen] = useState(false);
     const [email, setEmail] = useState('');
     const [pass, setPass] = useState('');
     const [errors, setErrors] = useState({
         email: false,
         pass: false
-    })
+    });
+    const [loginError, setLoginError] = useState(null);
 
     const validateFields = () => {
         let errs = { ...errors }
@@ -33,19 +37,18 @@ function Login() {
     const handleLogin = () => {
         console.log("Goin to login");
         signInWithEmailAndPassword(auth, email, pass)
-        .then((userCredential) => {
-            const user = userCredential.user;
-            navigate("/home")
-            console.log(user);
-        })
-        .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorCode, errorMessage)
-        });
+            .then(() => {
+                setOpen(false);
+                navigate("/home")
+            })
+            .catch((error) => {
+                setOpen(false);
+                setLoginError(error.code);
+            });
     }
 
     const handleSubmit = (e) => {
+        setOpen(true);
         e.preventDefault();
 
         if (validateFields()) {
@@ -53,12 +56,19 @@ function Login() {
             return true;
         }
 
+        setOpen(false);
         return false;
     }
 
     return (
         <div className="login-page">
             <form className="login-panel" onSubmit={handleSubmit}>
+                <h2>LOGIN</h2>
+                {
+                    loginError && <Alert variant="filled" severity="error">
+                        {loginError}
+                    </Alert>
+                }
                 <div className="email-pass-login">
                     <div className="email-pass-row">
                         <input type="text" required className={errors.email ? 'error' : ''} value={email} onChange={(e) => setEmail(e.target.value)} name="email" id="email" />
@@ -70,7 +80,10 @@ function Login() {
                     </div>
                     <button type="submit">LOGIN</button>
                 </div>
+                <p className="signup-msg">Don't have an account? <a href="/signup">Sign up</a></p>
             </form>
+
+            <BackdropOverlay open={open} />
         </div>
     )
 }

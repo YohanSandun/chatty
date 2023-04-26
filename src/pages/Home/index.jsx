@@ -7,8 +7,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import NewChat from "../../dialogs/NewChat";
 import AddCommentIcon from '@mui/icons-material/AddComment';
 import SendIcon from '@mui/icons-material/Send';
-import Backdrop from '@mui/material/Backdrop';
-import CircularProgress from '@mui/material/CircularProgress';
+import BackdropOverlay from "../../components/BackdropOverlay";
 
 function Home() {
 
@@ -94,7 +93,7 @@ function Home() {
                         _chats.push({
                             id: doc.id,
                             name: data.participant_names[0],
-                            otherUser: data.participants[1],
+                            otherUser: data.participants[0],
                             lastMessage: ''
                         });
                     }
@@ -179,12 +178,7 @@ function Home() {
 
             {showNewChat && <NewChat setShowNewChat={setShowNewChat} email={email} setEmail={setEmail} addNewChat={addNewChat} />}
 
-            <Backdrop
-                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-                open={open}
-            >
-                <CircularProgress color="inherit" />
-            </Backdrop>
+            <BackdropOverlay open={open}/>
         </div>
     )
 }
