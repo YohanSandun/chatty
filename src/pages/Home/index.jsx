@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import './Home.css';
 import Chat from "../../components/Chat";
 import app from '../../lib/firebase';
-import { orderBy, getDoc, onSnapshot, getFirestore, query, collection, where, getDocs, doc, addDoc, serverTimestamp } from "firebase/firestore";
+import { increment, updateDoc, orderBy, onSnapshot, getFirestore, query, collection, where, getDocs, doc, addDoc, serverTimestamp } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import NewChat from "../../dialogs/NewChat";
 import AddCommentIcon from '@mui/icons-material/AddComment';
@@ -16,7 +16,7 @@ function Home() {
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    const [mydoc, setMydoc] = useState(null);
+   
     const [chats, setChats] = useState([]);
     const [chat, setChat] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -25,15 +25,17 @@ function Home() {
     const [email, setEmail] = useState('');
     const [open, setOpen] = useState(false);
 
-    const scrollElement = useRef(null);
+    const scrollElementRef = useRef(null);
+    const mydocRef = useRef(null);
 
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 let d = doc(db, '/users/' + user.uid);
-                getDoc(d).then((docSnap) => {
-                    userName.current = docSnap.data().name;
-                    setMydoc(d);
+                onSnapshot(d, snapshot => {
+                    userName.current = snapshot.data().name;
+                    mydocRef.current = d;
+                    loadChats();
                 });
             } else {
                 console.log("user is logged out")
@@ -43,17 +45,12 @@ function Home() {
     }, []);
 
     useEffect(() => {
-        loadChats();
-        // eslint-disable-next-line
-    }, [mydoc]);
-
-    useEffect(() => {
         loadMessages();
         // eslint-disable-next-line
     }, [chat]);
 
     useEffect(() => {
-        scrollElement.current.scrollTop = scrollElement.current.scrollHeight;
+        scrollElementRef.current.scrollTop = scrollElementRef.current.scrollHeight;
     }, [messages])
 
     const loadMessages = () => {
@@ -66,7 +63,7 @@ function Home() {
             querySnapshot.forEach((doc) => {
                 let data = doc.data();
                 _messages.push({
-                    fromMe: data.from.id === mydoc.id,
+                    fromMe: data.from.id === mydocRef.current.id,
                     content: data.content,
                     time: data.time
                 });
@@ -76,13 +73,13 @@ function Home() {
     }
 
     const loadChats = () => {
-        const q = query(collection(db, "chats"), where("participants", "array-contains", mydoc));
+        const q = query(collection(db, "chats"), where("participants", "array-contains", mydocRef.current));
         getDocs(q).then((querySnapshot) => {
             let _chats = [];
             querySnapshot.forEach((doc) => {
                 let data = doc.data();
                 if (data.participants.length === 2) {
-                    if (data.participants[0].id === mydoc.id) {
+                    if (data.participants[0].id === mydocRef.current.id) {
                         _chats.push({
                             id: doc.id,
                             name: data.participant_names[1],
@@ -108,7 +105,7 @@ function Home() {
     const sendMessage = () => {
         addDoc(collection(db, "chats/" + chat.id + "/messages"), {
             content: message,
-            from: mydoc,
+            from: mydocRef.current,
             to: chat.otherUser,
             time: serverTimestamp()
         }).then(() => setMessage(''));
@@ -119,14 +116,20 @@ function Home() {
         const q = query(collection(db, "users"), where("email", "==", email));
         getDocs(q).then(querySnapshot => {
             if (querySnapshot.docs.length > 0) {
+                let otherUser = doc(db, "users/" + querySnapshot.docs[0].id);
                 addDoc(collection(db, "chats"), {
-                    participants: [mydoc, doc(db, "users/" + querySnapshot.docs[0].id)],
+                    participants: [mydocRef.current, otherUser],
                     participant_names: [userName.current, querySnapshot.docs[0].data().name]
                 }).then(() => {
                     setShowNewChat(false);
                     setOpen(false);
                     loadChats();
                 })
+                
+                updateDoc(otherUser, {
+                    chats: increment(1)
+                });
+
             } else {
                 setOpen(false);
                 alert("User not found!");
@@ -153,10 +156,10 @@ function Home() {
                         <img src="https://st3.depositphotos.com/4111759/13425/v/600/depositphotos_134255710-stock-illustration-avatar-vector-male-profile-gray.jpg" alt="Profile" />
                     </div>
                     <div className="other-info">
-                        <b>Hello</b>
+                        <b>{chat && chat.name}</b>
                     </div>
                 </div>
-                <div className="messages-list" ref={scrollElement}>
+                <div className="messages-list" ref={scrollElementRef}>
                     {
                         chat &&
                         messages.map((item, index) => (

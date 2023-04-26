@@ -5,7 +5,7 @@ import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom'
 import BackdropOverlay from "../../components/BackdropOverlay";
 import Alert from '@mui/material/Alert';
-import { addDoc, collection, getFirestore } from "firebase/firestore";
+import { setDoc, doc, getFirestore } from "firebase/firestore";
 
 function Signup() {
 
@@ -41,10 +41,11 @@ function Signup() {
 
     const handleSignup = () => {
         createUserWithEmailAndPassword(auth, email, pass)
-            .then(() => {
-                addDoc(collection(db, "users"), {
+            .then((user) => {
+                setDoc(doc(db, "users", user.user.uid), {
                     name: username,
-                    email: email
+                    email: email,
+                    chats: 0
                 }).then(() => {
                     setOpen(false);
                     navigate("/home")
