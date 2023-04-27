@@ -9,7 +9,7 @@ function TextMessage({ item }) {
     let date = item.time.toDate();
     let hours = date.getHours();
     let mins = date.getMinutes();
-    let ampm = hours >= 12 ? 'PM' : 'AM';
+    let ampm = hours >= 12 ? 'pm' : 'am';
 
     if (hours > 12) {
         hours -= 12;
@@ -17,14 +17,11 @@ function TextMessage({ item }) {
         hours = 12;
     }
 
-    if (hours <= 9) {
-        hours = '0'+hours;
-    }
     if (mins <= 9) {
         mins = '0'+mins;
     }
 
-    const [folded, setFolded] = useState(item.content.length > 300);
+    const [folded, setFolded] = useState(false);
 
     return (
         <div className={item.fromMe ? "message my-message" : "message"}>

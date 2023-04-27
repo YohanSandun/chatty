@@ -11,14 +11,11 @@ import BackdropOverlay from "../../components/BackdropOverlay";
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import TextMessage from "../../components/Messages/TextMessage";
+import { encrypt, decrypt } from "../../lib/crypto";
 
 function Home() {
-
-    var userName = useRef('');
-
     const db = getFirestore(app);
     const auth = getAuth(app);
-
 
     const [chats, setChats] = useState([]);
     const [chat, setChat] = useState(null);
@@ -28,6 +25,7 @@ function Home() {
     const [email, setEmail] = useState('');
     const [open, setOpen] = useState(false);
 
+    const userName = useRef('');
     const scrollElementRef = useRef(null);
     const mydocRef = useRef(null);
     const chatsRef = useRef(null);
@@ -74,13 +72,18 @@ function Home() {
 
         hideChats();
 
+        // getDoc(chat.otherUser).then((snapshot) => {
+        //     chat.rsa = new RSAKey();
+        //     chat.rsa.setPublicString(snapshot.data().public);
+        // });
+
         onSnapshot(query(collection(db, "chats/" + chat.id + '/messages'), orderBy("time", "asc")), querySnapshot => {
             let _messages = [];
             querySnapshot.forEach((doc) => {
                 let data = doc.data();
                 _messages.push({
                     fromMe: data.from.id === mydocRef.current.id,
-                    content: data.content,
+                    content: decrypt(data.content, chat.key),
                     time: data.time
                 });
             });
@@ -100,14 +103,16 @@ function Home() {
                             id: doc.id,
                             name: data.participant_names[1],
                             otherUser: data.participants[1],
-                            lastMessage: ''
+                            lastMessage: '',
+                            key: data.key,
                         });
                     } else {
                         _chats.push({
                             id: doc.id,
                             name: data.participant_names[0],
                             otherUser: data.participants[0],
-                            lastMessage: ''
+                            lastMessage: '',
+                            key: data.key,
                         });
                     }
                 }
@@ -123,7 +128,7 @@ function Home() {
         if (msg.length > 0) {
             setMessage('');
             addDoc(collection(db, "chats/" + chat.id + "/messages"), {
-                content: msg,
+                content: encrypt(msg, chat.key),
                 from: mydocRef.current,
                 to: chat.otherUser,
                 time: serverTimestamp()
@@ -139,7 +144,8 @@ function Home() {
                 let otherUser = doc(db, "users/" + querySnapshot.docs[0].id);
                 addDoc(collection(db, "chats"), {
                     participants: [mydocRef.current, otherUser],
-                    participant_names: [userName.current, querySnapshot.docs[0].data().name]
+                    participant_names: [userName.current, querySnapshot.docs[0].data().name],
+                    key: 'k' + parseInt(11111 + Math.random() * (99999 - 11111))
                 }).then(() => {
                     setShowNewChat(false);
                     setOpen(false);

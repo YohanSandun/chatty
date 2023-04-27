@@ -42,18 +42,19 @@ function Signup() {
     const handleSignup = () => {
         createUserWithEmailAndPassword(auth, email, pass)
             .then((user) => {
+
                 setDoc(doc(db, "users", user.user.uid), {
                     name: username,
                     email: email,
-                    chats: 0
+                    chats: 0,
                 }).then(() => {
                     setOpen(false);
                     navigate("/home")
-                })
-                .catch(() => {
+                }).catch(() => {
                     setOpen(false);
                     setSignupError("Signup failed!");
                 });
+
             })
             .catch((error) => {
                 setOpen(false);
