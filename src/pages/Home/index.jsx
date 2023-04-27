@@ -19,7 +19,7 @@ function Home() {
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-   
+
     const [chats, setChats] = useState([]);
     const [chat, setChat] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -54,7 +54,9 @@ function Home() {
     }, [chat]);
 
     useEffect(() => {
-        scrollElementRef.current.scrollTop = scrollElementRef.current.scrollHeight;
+        if (scrollElementRef.current) {
+            scrollElementRef.current.scrollTop = scrollElementRef.current.scrollHeight;
+        }
     }, [messages])
 
     const showChats = () => {
@@ -69,7 +71,7 @@ function Home() {
         if (chat === null) {
             return;
         }
-        
+
         hideChats();
 
         onSnapshot(query(collection(db, "chats/" + chat.id + '/messages'), orderBy("time", "asc")), querySnapshot => {
@@ -117,12 +119,16 @@ function Home() {
     }
 
     const sendMessage = () => {
-        addDoc(collection(db, "chats/" + chat.id + "/messages"), {
-            content: message,
-            from: mydocRef.current,
-            to: chat.otherUser,
-            time: serverTimestamp()
-        }).then(() => setMessage(''));
+        let msg = message.trim();
+        if (msg.length > 0) {
+            setMessage('');
+            addDoc(collection(db, "chats/" + chat.id + "/messages"), {
+                content: msg,
+                from: mydocRef.current,
+                to: chat.otherUser,
+                time: serverTimestamp()
+            });
+        }
     }
 
     const addNewChat = () => {
@@ -139,7 +145,7 @@ function Home() {
                     setOpen(false);
                     loadChats();
                 })
-                
+
                 updateDoc(otherUser, {
                     chats: increment(1)
                 });
@@ -164,9 +170,10 @@ function Home() {
                     <AddCommentIcon />
                 </div>
             </div>
+
             <div className="messages">
                 <div className="message-header">
-                    <FormatListBulletedIcon onClick={showChats}/>
+                    <FormatListBulletedIcon onClick={showChats} />
                     <div className="profile-pic">
                         <img src="https://st3.depositphotos.com/4111759/13425/v/600/depositphotos_134255710-stock-illustration-avatar-vector-male-profile-gray.jpg" alt="Profile" />
                     </div>
@@ -183,18 +190,20 @@ function Home() {
                     }
                 </div>
                 <div className="message-input-container">
-                    <div className="message-input">
-                        <textarea value={message} onChange={e => setMessage(e.target.value)} name="text" id="text" rows="1" placeholder="Your Message"></textarea>
-                        <div className="send-button" onClick={() => sendMessage()}>
-                            <SendIcon />
+                    {chat &&
+                        <div className="message-input">
+                            <textarea autoComplete="nope" value={message} onChange={e => setMessage(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } } } name="text" id="text" rows="1" placeholder="Your Message"></textarea>
+                            <div className="send-button" onClick={() => sendMessage()}>
+                                <SendIcon />
+                            </div>
                         </div>
-                    </div>
+                    }
                 </div>
             </div>
 
             {showNewChat && <NewChat setShowNewChat={setShowNewChat} email={email} setEmail={setEmail} addNewChat={addNewChat} />}
 
-            <BackdropOverlay open={open}/>
+            <BackdropOverlay open={open} />
         </div>
     )
 }
