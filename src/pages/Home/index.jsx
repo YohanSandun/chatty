@@ -10,6 +10,7 @@ import SendIcon from '@mui/icons-material/Send';
 import BackdropOverlay from "../../components/BackdropOverlay";
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import TextMessage from "../../components/Messages/TextMessage";
 
 function Home() {
 
@@ -177,9 +178,7 @@ function Home() {
                     {
                         chat &&
                         messages.map((item, index) => (
-                            <div key={index} className={item.fromMe ? "message my-message" : "message"}>
-                                {item.content}
-                            </div>
+                            <TextMessage item={item} key={index} />
                         ))
                     }
                 </div>

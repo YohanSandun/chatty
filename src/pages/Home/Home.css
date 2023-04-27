@@ -110,12 +110,12 @@
 }
 
 .messages-list {
-    display: flex;
     flex: 1 1 auto;
-    flex-direction: column;
     width: 100%;
     gap: 1rem;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .messages-list .message {
@@ -123,15 +123,40 @@
     background: var(--color-light);
     font-size: 11pt;
     border-radius: 10px;
-    width: 80%;
-    padding: 1rem;
+    padding: 0.5rem 0.5rem 1rem 0.5rem;
+    max-width: 60%;
+    min-width: 5rem;
+    width: fit-content;
+    margin-left: 3rem;
+    position: relative;
+}
+
+.messages-list .message .time {
+    color: var(--color-dark-variant);
+    font-size: 8pt;
+    position: absolute;
+    right: 5px;
+    bottom: 3px;
+}
+
+.messages-list .my-message .time {
+    color: var(--color-light-variant);
 }
 
 .messages-list .my-message {
-    align-self: right;
+    align-self: flex-end;
+    margin-right: 3rem;
     background: var(--color-primary);
     color: var(--color-light);
-    margin-left: 20%;
+}
+
+.messages-list .message div {
+    color: var(--color-light);
+}
+
+.messages-list .read-more {
+    cursor: pointer;
+    color: var(--color-success);
 }
 
 .message-input-container {
@@ -191,5 +216,14 @@
 
     .chats > svg {
         display: inline-block;
+    }
+
+    .messages-list .message {
+        max-width: 80%;
+        margin-left: 1rem;
+    }
+    
+    .messages-list .my-message {
+        margin-right: 1rem;
     }
 }
